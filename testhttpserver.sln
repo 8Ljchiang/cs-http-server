@@ -1,0 +1,28 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{DD4A1BA2-5831-41B4-BCC9-E779BC7693E8}"
+	ProjectSection(SolutionItems) = preProject
+		EmptyClass.cs = EmptyClass.cs
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "testcli", "testcli\testcli.csproj", "{6688B388-FC97-4C95-9579-D5D337C90734}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "server", "server\server.csproj", "{5BC7EC8C-FFF9-470C-BA9D-128111276E82}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6688B388-FC97-4C95-9579-D5D337C90734}.Debug|x86.ActiveCfg = Debug|x86
+		{6688B388-FC97-4C95-9579-D5D337C90734}.Debug|x86.Build.0 = Debug|x86
+		{6688B388-FC97-4C95-9579-D5D337C90734}.Release|x86.ActiveCfg = Release|x86
+		{6688B388-FC97-4C95-9579-D5D337C90734}.Release|x86.Build.0 = Release|x86
+		{5BC7EC8C-FFF9-470C-BA9D-128111276E82}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{5BC7EC8C-FFF9-470C-BA9D-128111276E82}.Debug|x86.Build.0 = Debug|Any CPU
+		{5BC7EC8C-FFF9-470C-BA9D-128111276E82}.Release|x86.ActiveCfg = Release|Any CPU
+		{5BC7EC8C-FFF9-470C-BA9D-128111276E82}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
