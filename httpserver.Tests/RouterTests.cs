@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Xunit;
 
 namespace Server.UnitTests
@@ -142,6 +143,75 @@ namespace Server.UnitTests
 
             Assert.False(router.Routes.ContainsKey(path));
             Assert.Equal(expectedPathCount, router.Routes.Count);
+        }
+
+
+        [Theory]
+        [InlineData("GET", "/", "HTTP/1.1", "")]
+        public void HandleRequest_CalledWithValidRequest_ReturnsValidResponse(string method, string path, string protocol, string body)
+        {
+            // Arrange
+            string headers = "Host: localhost:5000\n" +
+                "User-Agent: xUnit/1.0\n" +
+                "Accept: */*\n";
+            string requestString = method + " " + path + " " + protocol + "\n"
+                + headers + "\n"
+                + "\n" + body;
+            Dictionary<string, string> headerDict = new Dictionary<string, string>();
+            headerDict.Add("Host", "localhost:5000");
+            headerDict.Add("User-Agent", "xUnit/1.0");
+            headerDict.Add("Accept", "*/*");
+
+            Request request = new Request(requestString, method, path, protocol, headerDict, body);
+            Response defaultResponse = new Response();
+
+            Response controller(Request req, Response res)
+            {
+                return defaultResponse;
+            }
+            Router router = new Router();
+            router.Use(method, path, controller);
+
+            // Act
+            Response actualResponse = router.HandleRequest(request);
+
+            // Assert
+            Assert.NotNull(actualResponse);
+            Assert.IsType<Response>(actualResponse);
+            Assert.Equal(defaultResponse.Body, actualResponse.Body);
+            Assert.Equal(defaultResponse.Status, actualResponse.Body);
+            Assert.Equal(defaultResponse.Protocol, actualResponse.Protocol);
+        }
+
+        [Theory]
+        [InlineData("INVALID", "/", "HTTP/1.1")]
+        public void HandleRequest_CalledWithInvalidRequest_ReturnsInvalidRequestResponse(string method, string path, string protocol)
+        {
+
+        }
+
+        [Fact]
+        public void HandleRequest_CalledWithValidOptionsRequest_ReturnsResponseWithAllowedMethodsHeader()
+        {
+
+        }
+
+        [Fact]
+        public void HandleRequest_CalledWithValidHeadRequest_ReturnsResponseWithGetHeaders()
+        {
+
+        }
+
+        [Fact]
+        public void HandleRequest_CalledWithValidRequest_ReturnsMissingRouteResponse()
+        {
+
+        }
+
+        [Fact] 
+        public void HandleRequest_CalledWithValidRequest_ReturnsMissingMethodResponse()
+        {
+
         }
     }
 }
