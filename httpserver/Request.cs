@@ -8,7 +8,7 @@ namespace Server
         private string _requestString;
         private string _method;
         private string _path;
-        private string _type;
+        private string _protocol;
         private Dictionary<string, string> _headers;
         private string _body;
 
@@ -17,7 +17,7 @@ namespace Server
             RequestString = requestString;
             Method = method;
             Path = path;
-            Type = protocol;
+            Protocol = protocol;
             Headers = headers;
             Body = body;
         }
@@ -25,7 +25,7 @@ namespace Server
         public string RequestString { get => _requestString; set => _requestString = value; }
         public string Method { get => _method; set => _method = value; }
         public string Path { get => _path; set => _path = value; }
-        public string Type { get => _type; set => _type = value; }
+        public string Protocol { get => _protocol; set => _protocol = value; }
         public Dictionary<string, string> Headers { get => _headers; set => _headers = value; }
         public string Body { get => _body; set => _body = value; }
     }

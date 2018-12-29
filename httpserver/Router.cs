@@ -35,6 +35,53 @@ namespace Server
             }
         }
 
+        public Response HandleRequest(Request clientRequest)
+        {
+            string requestProtocol = clientRequest.Protocol.Split("/")[0];
+            string requestMethod = clientRequest.Method;
+            string requestPath = clientRequest.Path;
+
+            if (IsValidRequest(clientRequest) && requestProtocol.Equals("HTTP"))
+            {
+                if (ContainsPath(requestPath))
+                { 
+                    if (ContainsRoute(requestMethod, requestPath))
+                    {
+                        Response defaultResponse = new Response();
+                        Route matchedRoute = GetMatchingRouteWithFind(requestMethod, requestPath);
+                        return matchedRoute.CreateResponse(clientRequest, defaultResponse);
+                    }
+                    else
+                    {
+                        return HandleMissingRoute(clientRequest);
+                    }
+                }
+                else
+                {
+                    return HandleMissingPath(clientRequest);
+                }
+            }
+            else
+            {
+                return HandleInvalidRequest(clientRequest);
+            }
+        }
+
+        private Response HandleMissingRoute(Request clientRequest)
+        {
+            return new Response();
+        }
+
+        private Response HandleMissingPath(Request clientRequest)
+        {
+            return new Response();
+        }
+
+        private Response HandleInvalidRequest(Request clientRequest)
+        {
+            return new Response();
+        }
+
         private Route GetMatchingRoute(string method, string path)
         {
             List<Route> routes = GetRoutes(path);
@@ -51,6 +98,11 @@ namespace Server
         private List<Route> GetRoutes(string path)
         {
             return Routes[path];
+        }
+
+        private Route GetMatchingRouteWithFind(string method, string path)
+        {
+            return GetRoutes(path).Find(route => route.Method.Equals(method));
         }
 
         private void AddRouteToRoutes(Route route)
@@ -71,6 +123,26 @@ namespace Server
         private bool IsValidPath(string path)
         {
             return (path.Substring(0,1).Equals("/"));
+        }
+
+        private bool IsValidRequest(Request request)
+        {
+            return false;
+        }
+
+        private bool ContainsPath(string path)
+        {
+            return (Routes.ContainsKey(path));
+        }
+
+        private bool ContainsRoute(string method, string path)
+        {
+            Route route = GetMatchingRouteWithFind(method, path);
+            if (route != null)
+            {
+                return true;
+            }
+            return false;
         }
     }
 }
