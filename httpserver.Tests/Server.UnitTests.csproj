@@ -5,7 +5,7 @@
 
         <IsPackable>false</IsPackable>
 
-        <RootNamespace>TestProject1</RootNamespace>
+        <RootNamespace>Server.UnitTests</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>

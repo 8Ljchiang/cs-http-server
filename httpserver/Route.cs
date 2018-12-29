@@ -14,7 +14,7 @@ namespace Server
             _controller = controller;
         }
 
-        public IResponse GetResponse(IRequest req, IResponse res)
+        public IResponse CreateResponse(IRequest req, IResponse res)
         {
             return _controller(req, res);
         }
