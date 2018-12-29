@@ -9,10 +9,13 @@ namespace Server
 
         public Route(string method, string path, Func<Request, Response, Response> controller)
         {
-            _method = method;
-            _path = path;
+            Method = method;
+            Path = path;
             _controller = controller;
         }
+
+        public string Method { get => _method; set => _method = value; }
+        public string Path { get => _path; set => _path = value; }
 
         public Response CreateResponse(Request req, Response res)
         {

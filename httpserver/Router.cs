@@ -5,25 +5,55 @@ namespace Server
 {
     public class Router
     {
-        private Dictionary<string, List<Route>> routes = new Dictionary<string, List<Route>>();
+        private Dictionary<string, List<Route>> _routes = new Dictionary<string, List<Route>>();
 
-        public Router() {}
+        public Router() { }
 
-        public void use(string method, string path, Func<Request, Response, Response> controller)
+        public Dictionary<string, List<Route>> Routes { get => _routes; set => _routes = value; }
+
+        public void Use(string method, string path, Func<Request, Response, Response> controller)
         {
-            Route newRoute = new Route(path, method, controller);
+            string routePath = path.ToLower();
+            string routeMethod = method.ToUpper();
+            Route newRoute = new Route(routeMethod, routePath, controller);
 
-            if (routes.ContainsKey(path))
+            if (Routes.ContainsKey(routePath))
+            {
+                AddRouteToRoutes(newRoute);
+            }
+            else
             {
                 List<Route> routeList = new List<Route>
                 {
                     newRoute
                 };
+                Routes.Add(routePath, routeList);
             }
-            else
+        }
+
+        private Route GetMatchingRoute(string method, string path)
+        {
+            List<Route> routes = GetRoutes(path);
+            foreach (var route in routes)
             {
-                List<Route> routeList = routes[path];
-                routeList.Add(newRoute);
+                if (route.Method.Equals(method))
+                {
+                    return route;
+                }
+            }
+            return null;
+        }
+
+        private List<Route> GetRoutes(string path)
+        {
+            return Routes[path];
+        }
+
+        private void AddRouteToRoutes(Route route)
+        {
+            if (GetMatchingRoute(route.Method, route.Path) == null)
+            {
+                Routes[route.Path].Add(route);
             }
         }
     }
