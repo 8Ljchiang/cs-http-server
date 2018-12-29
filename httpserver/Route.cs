@@ -5,17 +5,18 @@ namespace Server
     {
         private string _method;
         private string _path;
-        private string _controllerId;
+        private readonly Func<in IRequest, in IResponse, out IResponse> _controller;
 
-        public Route(string method, string path, string controllerId)
+        public Route(string method, string path, Func<in IRequest, in IResponse, out IResponse> controller)
         {
             _method = method;
             _path = path;
-            _controllerId = controllerId;
+            _controller = controller;
         }
 
-        public string ControllerId { get => _controllerId; set => _controllerId = value; }
-        public string Path { get => _path; set => _path = value; }
-        public string Method { get => _method; set => _method = value; }
+        public IResponse GetResponse(IRequest req, IResponse res)
+        {
+            return _controller(req, res);
+        }
     }
 }
