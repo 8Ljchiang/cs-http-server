@@ -5,16 +5,16 @@ namespace Server
     {
         private string _method;
         private string _path;
-        private readonly Func<IRequest, IResponse, IResponse> _controller;
+        private readonly Func<Request, Response, Response> _controller;
 
-        public Route(string method, string path, Func<IRequest, IResponse, IResponse> controller)
+        public Route(string method, string path, Func<Response, Response, Response> controller)
         {
             _method = method;
             _path = path;
             _controller = controller;
         }
 
-        public IResponse CreateResponse(IRequest req, IResponse res)
+        public Response CreateResponse(Request req, Response res)
         {
             return _controller(req, res);
         }
