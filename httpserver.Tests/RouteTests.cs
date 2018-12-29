@@ -7,7 +7,7 @@ namespace Server.UnitTests
     public class RouteTests
     {
         [Fact]
-        public void CreateResponse_WhenCalled_ShouldCallFuncDelegate()
+        public void CreateResponse_WhenCalled_ShouldCallFuncDelegateAndReturnResponse()
         {
             // Arrange
             int expectedCallCount = 1;
@@ -19,17 +19,24 @@ namespace Server.UnitTests
                 methodCallHistory.Add(expectedCallString);
                 return res;
             };
-
             Route route = new Route("GET", "/home", controller);
 
-            // Act
-            Request mockRequest = new Request();
+            Dictionary<string, string> headers = new Dictionary<string, string>
+            {
+                { "Content-Type", "application/json" }
+            };
+            Request mockRequest = new Request("requestString", "GET", "/home", "HTTP/1.1", headers, "");
             Response mockResponse = new Response();
-            route.CreateResponse(mockRequest, mockResponse);
+
+            // Act
+            Response actual = route.CreateResponse(mockRequest, mockResponse);
 
             // Assert
             Assert.Equal(expectedCallCount, methodCallHistory.Count);
             Assert.Equal(expectedCallString, methodCallHistory[0]);
+
+            Assert.NotNull(actual);
+            Assert.IsType<Response>(actual);
         }
     }
 }

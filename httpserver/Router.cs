@@ -9,7 +9,7 @@ namespace Server
 
         public Router() {}
 
-        public void use(string method, string path, Func<IResponse, IRequest, IReponse> contoller)
+        public void use(string method, string path, Func<Request, Response, Response> controller)
         {
             Route newRoute = new Route(path, method, controller);
 

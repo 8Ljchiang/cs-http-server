@@ -5,9 +5,9 @@ namespace Server
     {
         private string _method;
         private string _path;
-        private readonly Func<Request, Response, Response> _controller;
+        private Func<Request, Response, Response> _controller;
 
-        public Route(string method, string path, Func<Response, Response, Response> controller)
+        public Route(string method, string path, Func<Request, Response, Response> controller)
         {
             _method = method;
             _path = path;
