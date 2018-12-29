@@ -74,5 +74,54 @@ namespace Server.UnitTests
             Assert.Equal(expectedRouteCount, router.Routes[path1].Count);
             Assert.Equal(expectedRouteCount, router.Routes[path2].Count);
         }
+
+        [Theory]
+        [InlineData("get", "/")]
+        [InlineData("put", "/")]
+        [InlineData("post", "/")]
+        [InlineData("delete", "/")]
+        [InlineData("GET", "/")]
+        [InlineData("PUT", "/")]
+        [InlineData("POST", "/")]
+        [InlineData("DELETE", "/")]
+        public void Use_CalledWithValidMethods_Add1RouteToRoutesDictionary(string method, string path)
+        {
+            int expectedRouteCount = 1;
+            int expectedPathCount = 1;
+            Func<Request, Response, Response> controller = (Request req, Response res) =>
+            {
+                return res;
+            };
+
+            Router router = new Router();
+
+            router.Use(method, path, controller);
+
+            Assert.True(router.Routes.ContainsKey(path));
+            Assert.Equal(expectedPathCount, router.Routes.Count);
+            Assert.Equal(expectedRouteCount, router.Routes[path].Count);
+        }
+
+        [Theory]
+        [InlineData("gt", "/")]
+        [InlineData("pt", "/")]
+        [InlineData("post", "/")]
+        [InlineData("del", "/")]
+        public void Use_CalledWithInvalidMethods_NoRoutesAdded(string method, string path)
+        {
+            int expectedPathCount = 0;
+            Func<Request, Response, Response> controller = (Request req, Response res) =>
+            {
+                return res;
+            };
+
+            Router router = new Router();
+
+            router.Use(method, path, controller);
+
+            Assert.False(router.Routes.ContainsKey(path));
+            Assert.Equal(expectedPathCount, router.Routes.Count);
+        }
     }
+
 }
