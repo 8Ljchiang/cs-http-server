@@ -1,5 +1,6 @@
 ﻿using System;
-namespace httpserver
+
+namespace Server
 {
     public class Hello
     {
