@@ -12,17 +12,18 @@ namespace Server
 
         public Response()
         {
-            this._headers.Add("Content-Type", Type);
+            this.Headers.Add("Content-Type", Type);
         }
 
         public void AddHeader(string key, string value)
         {
-            this._headers.Add(key, value);
+            this.Headers.Add(key, value);
         }
 
         public string Status { get => _status; set => _status = value; }
         public string Protocol { get => _protocol; set => _protocol = value; }
         public string Type { get => _type; set => _type = value; }
         public string Body { get => _body; set => _body = value; }
+        public Dictionary<string, string> Headers { get => _headers; set => _headers = value; }
     }
 }

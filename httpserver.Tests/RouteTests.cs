@@ -20,8 +20,6 @@ namespace Server.UnitTests
                 return res;
             };
 
-
-
             Route route = new Route("GET", "/home", controller);
 
             // Act
