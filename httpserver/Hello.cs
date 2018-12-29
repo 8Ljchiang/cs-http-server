@@ -9,9 +9,14 @@ namespace Server
 
         }
 
-        public String SayHello()
+        public string SayHello()
         {
             return "Hello World";
+        }
+
+        public string SayHello(string name)
+        {
+            return $"Hello {name}";
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using System;
 using Xunit;
 
-namespace httpserver.Tests
+namespace Server.Tests
 {
     public class HelloTests
     {
@@ -16,6 +16,21 @@ namespace httpserver.Tests
             string actual = greeter.SayHello();
 
             // Assert
+            Assert.Equal(expected, actual);
+        }
+
+        [Theory]
+        [InlineData("Mike", "Hello Mike")]
+        [InlineData("Bill", "Hello Bill")]
+        public void SayHello_MethodCalledWithName_ReturnsGreetingWithName(string name, string expected) 
+        {
+            // Arrange
+            Hello greeter = new Hello();
+
+            // Act
+            string actual = greeter.SayHello(name);
+
+            // Assert    
             Assert.Equal(expected, actual);
         }
     }
