@@ -186,11 +186,11 @@ namespace Server.UnitTests
             Assert.Equal(defaultResponse.Protocol, actualResponse.Protocol);
         }
 
-        [Theory(Skip = "Tests not ready")]
-        [InlineData("INVALID", "/", "HTTP/1.1")]
-        [InlineData("GET", "INVALID", "HTTP/1.1")]
-        [InlineData("GET", "/", "INVALID/1.1")]
-        public void HandleRequest_CalledWithInvalidRequest_ReturnsInvalidRequestResponse(string method, string path, string protocol)
+        [Theory]
+        [InlineData("INVALID", "/", "HTTP/1.1", "")]
+        [InlineData("GET", "INVALID", "HTTP/1.1", "")]
+        [InlineData("GET", "/", "INVALID/1.1", "")]
+        public void HandleRequest_CalledWithInvalidRequest_ReturnsInvalidRequestResponse(string method, string path, string protocol, string body)
         {
             // Arrange
             string headers = "Host: localhost:5000\n" +
@@ -199,17 +199,22 @@ namespace Server.UnitTests
             string requestString = method + " " + path + " " + protocol + "\n"
                 + headers + "\n"
                 + "\n" + body;
-            Dictionary<string, string> headerDict = new Dictionary<string, string>();
-            headerDict.Add("Host", "localhost:5000");
-            headerDict.Add("User-Agent", "xUnit/1.0");
-            headerDict.Add("Accept", "*/*");
+            Dictionary<string, string> headerDict = new Dictionary<string, string>
+            {
+                { "Host", "localhost:5000" },
+                { "User-Agent", "xUnit/1.0" },
+                { "Accept", "*/*" }
+            };
 
             Request request = new Request(requestString, method, path, protocol, headerDict, body);
-            Response defaultResponse = new Response();
+            Response expectedResponse = new Response
+            {
+                Status = "400 Bad Request"
+            };
 
             Response controller(Request req, Response res)
             {
-                return defaultResponse;
+                return new Response();
             }
             Router router = new Router();
             router.Use(method, path, controller);
@@ -220,9 +225,9 @@ namespace Server.UnitTests
             // Assert
             Assert.NotNull(actualResponse);
             Assert.IsType<Response>(actualResponse);
-            Assert.Equal(defaultResponse.Body, actualResponse.Body);
-            Assert.Equal(defaultResponse.Status, actualResponse.Status);
-            Assert.Equal(defaultResponse.Protocol, actualResponse.Protocol);
+            Assert.Equal(expectedResponse.Body, actualResponse.Body);
+            Assert.Equal(expectedResponse.Status, actualResponse.Status);
+            Assert.Equal(expectedResponse.Protocol, actualResponse.Protocol);
         }
 
         [Fact(Skip = "Tests not ready")]

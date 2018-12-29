@@ -44,7 +44,7 @@ namespace Server
             if (IsValidRequest(clientRequest) && requestProtocol.Equals("HTTP"))
             {
                 if (ContainsPath(requestPath))
-                { 
+                {
                     if (ContainsRoute(requestMethod, requestPath))
                     {
                         Response defaultResponse = new Response();
@@ -79,7 +79,12 @@ namespace Server
 
         private Response HandleInvalidRequest(Request clientRequest)
         {
-            return new Response();
+            Response response = new Response
+            {
+                Status = "400 Bad Request"
+            };
+
+            return response;
         }
 
         private Route GetMatchingRoute(string method, string path)
@@ -122,12 +127,20 @@ namespace Server
 
         private bool IsValidPath(string path)
         {
-            return (path.Substring(0,1).Equals("/"));
+            return (!string.IsNullOrEmpty(path) && path.Substring(0, 1).Equals("/"));
         }
 
         private bool IsValidRequest(Request request)
         {
-            return false;
+            string requestMethod = request.Method;
+            string requestPath = request.Path;
+
+            string[] acceptedMethods = { "GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS" };
+
+            bool hasAcceptedMethod = Array.Exists(acceptedMethods, element => element.Equals(requestMethod));
+            bool hasValidPath = IsValidPath(requestPath);
+
+            return (hasAcceptedMethod && hasValidPath);
         }
 
         private bool ContainsPath(string path)
