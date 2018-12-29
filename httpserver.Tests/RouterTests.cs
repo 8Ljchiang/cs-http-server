@@ -105,7 +105,7 @@ namespace Server.UnitTests
         [Theory]
         [InlineData("gt", "/")]
         [InlineData("pt", "/")]
-        [InlineData("post", "/")]
+        [InlineData("pst", "/")]
         [InlineData("del", "/")]
         public void Use_CalledWithInvalidMethods_NoRoutesAdded(string method, string path)
         {
@@ -122,6 +122,26 @@ namespace Server.UnitTests
             Assert.False(router.Routes.ContainsKey(path));
             Assert.Equal(expectedPathCount, router.Routes.Count);
         }
-    }
 
+        [Theory]
+        [InlineData("GET", "hello")]
+        [InlineData("PUT", "hello")]
+        [InlineData("POST", "hello")]
+        [InlineData("DELETE", "hello")]
+        public void Use_CalledWithInvalidPaths_NoRoutesAdded(string method, string path)
+        {
+            int expectedPathCount = 0;
+            Func<Request, Response, Response> controller = (Request req, Response res) =>
+            {
+                return res;
+            };
+
+            Router router = new Router();
+
+            router.Use(method, path, controller);
+
+            Assert.False(router.Routes.ContainsKey(path));
+            Assert.Equal(expectedPathCount, router.Routes.Count);
+        }
+    }
 }

@@ -15,19 +15,23 @@ namespace Server
         {
             string routePath = path.ToLower();
             string routeMethod = method.ToUpper();
-            Route newRoute = new Route(routeMethod, routePath, controller);
 
-            if (Routes.ContainsKey(routePath))
+            if (IsValidMethod(routeMethod) && IsValidPath(routePath))
             {
-                AddRouteToRoutes(newRoute);
-            }
-            else
-            {
-                List<Route> routeList = new List<Route>
+                Route newRoute = new Route(routeMethod, routePath, controller);
+
+                if (Routes.ContainsKey(routePath))
+                {
+                    AddRouteToRoutes(newRoute);
+                }
+                else
+                {
+                    List<Route> routeList = new List<Route>
                 {
                     newRoute
                 };
-                Routes.Add(routePath, routeList);
+                    Routes.Add(routePath, routeList);
+                }
             }
         }
 
@@ -55,6 +59,18 @@ namespace Server
             {
                 Routes[route.Path].Add(route);
             }
+        }
+
+        private bool IsValidMethod(string method)
+        {
+            string[] validMethods = new string[] { "GET", "PUT", "POST", "DELETE" };
+
+            return Array.Exists(validMethods, element => element.Equals(method));
+        }
+
+        private bool IsValidPath(string path)
+        {
+            return (path.Substring(0,1).Equals("/"));
         }
     }
 }
