@@ -17,9 +17,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Remove="RouteTests.cs" />
-    </ItemGroup>
-    <ItemGroup>
       <ProjectReference Include="..\httpserver\Server.csproj" />
     </ItemGroup>
 </Project>
