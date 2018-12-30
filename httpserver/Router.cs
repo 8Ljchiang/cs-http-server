@@ -63,15 +63,23 @@ namespace Server
             {
                 if (ContainsPath(requestPath))
                 {
-                    if (ContainsRoute(requestMethod, requestPath))
+                    switch (requestMethod)
                     {
-                        Response defaultResponse = new Response();
-                        Route matchedRoute = GetMatchingRouteWithFind(requestMethod, requestPath);
-                        return matchedRoute.CreateResponse(clientRequest, defaultResponse);
-                    }
-                    else
-                    {
-                        return HandleMissingMethod(clientRequest);
+                        case "HEAD":
+                            return HandleHeadRequest(clientRequest);
+                        case "OPTIONS":
+                            return HandleOptionsRequest(clientRequest);
+                        default:
+                            if (ContainsRoute(requestMethod, requestPath))
+                            {
+                                Response defaultResponse = new Response();
+                                Route matchedRoute = GetMatchingRouteWithFind(requestMethod, requestPath);
+                                return matchedRoute.CreateResponse(clientRequest, defaultResponse);
+                            }
+                            else
+                            {
+                                return HandleMissingMethod(clientRequest);
+                            }
                     }
                 }
                 else
@@ -83,6 +91,33 @@ namespace Server
             {
                 return HandleInvalidRequest(clientRequest);
             }
+        }
+
+        private Response HandleHeadRequest(Request clientRequest)
+        {
+            Response response = new Response();
+            Route getRoute = GetMatchingRouteWithFind("GET", clientRequest.Path);
+            getRoute.CreateResponse(clientRequest, response);
+            response.Body = "";
+            return response;
+        }
+
+        private Response HandleOptionsRequest(Request clientRequest)
+        {
+            List<string> allowedMethods = new List<string>();
+            allowedMethods.Add("OPTIONS");
+            allowedMethods.Add("HEAD");
+
+            List<Route> routes = GetRoutes(clientRequest.Path);
+            foreach (var route in routes)
+            {
+                allowedMethods.Add(route.Method);
+            }
+
+            Response response = new Response();
+            string methods = String.Join(",", allowedMethods);
+            response.AddHeader("Allow", methods);
+            return response;
         }
 
         private Response HandleMissingMethod(Request clientRequest)

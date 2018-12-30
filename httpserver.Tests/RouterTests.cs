@@ -227,16 +227,113 @@ namespace Server.UnitTests
             Assert.Equal(expectedResponse.Protocol, actualResponse.Protocol);
         }
 
-        [Fact(Skip = "Tests not ready")]
+        [Fact]
         public void HandleRequest_CalledWithValidOptionsRequest_ReturnsResponseWithAllowedMethodsHeader()
         {
+            // Arrange
+            string method = "OPTIONS";
+            string path = "/";
+            string protocol = "HTTP/1.1";
+            string body = "";
+            string headers = "Host: localhost:5000\n" +
+                "User-Agent: xUnit/1.0\n" +
+                "Accept: */*\n";
+            string requestString = method + " " + path + " " + protocol + "\n"
+                + headers + "\n"
+                + "\n" + body;
+            Dictionary<string, string> headerDict = new Dictionary<string, string>
+            {
+                { "Host", "localhost:5000" },
+                { "User-Agent", "xUnit/1.0" },
+                { "Accept", "*/*" }
+            };
 
+            Request request = new Request(requestString, method, path, protocol, headerDict, body);
+            Response expectedResponse = new Response
+            {
+                Status = "200 OK",
+            };
+
+            Response controller(Request req, Response res)
+            {
+                return new Response();
+            }
+            Router router = new Router();
+            router.Use("GET", path, controller);
+            router.Use("PUT", path, controller);
+            router.Use("POST", path, controller);
+            router.Use("DELETE", path, controller);
+
+            // Act
+            Response actualResponse = router.HandleRequest(request);
+
+            // Assert
+            Assert.NotNull(actualResponse);
+            Assert.IsType<Response>(actualResponse);
+            Assert.Equal(expectedResponse.Body, actualResponse.Body);
+            Assert.Equal(expectedResponse.Status, actualResponse.Status);
+            Assert.Equal(expectedResponse.Protocol, actualResponse.Protocol);
+
+            Assert.True(actualResponse.Headers.ContainsKey("Allow"));
+
+            string[] methods = actualResponse.Headers["Allow"].Split(",");
+
+            Assert.Equal(6, methods.Length);
+            Assert.True(Array.Exists(methods, (m) => m.Equals("GET")));
+            Assert.True(Array.Exists(methods, (m) => m.Equals("PUT")));
+            Assert.True(Array.Exists(methods, (m) => m.Equals("POST")));
+            Assert.True(Array.Exists(methods, (m) => m.Equals("DELETE")));
+            Assert.True(Array.Exists(methods, (m) => m.Equals("HEAD")));
+            Assert.True(Array.Exists(methods, (m) => m.Equals("OPTIONS")));
         }
 
-        [Fact(Skip = "Tests not ready")]
+        [Fact]
         public void HandleRequest_CalledWithValidHeadRequest_ReturnsResponseWithGetHeaders()
         {
+            // Arrange
+            string method = "HEAD";
+            string path = "/";
+            string protocol = "HTTP/1.1";
+            string body = "";
+            string headers = "Host: localhost:5000\n" +
+                "User-Agent: xUnit/1.0\n" +
+                "Accept: */*\n";
+            string requestString = method + " " + path + " " + protocol + "\n"
+                + headers + "\n"
+                + "\n" + body;
+            Dictionary<string, string> headerDict = new Dictionary<string, string>
+            {
+                { "Host", "localhost:5000" },
+                { "User-Agent", "xUnit/1.0" },
+                { "Accept", "*/*" }
+            };
 
+            Request request = new Request(requestString, method, path, protocol, headerDict, body);
+            Response expectedResponse = new Response
+            {
+                Status = "200 OK",
+                Body = ""
+            };
+
+            Response controller(Request req, Response res)
+            {
+                return new Response();
+            }
+            Router router = new Router();
+            router.Use("GET", path, controller);
+
+            // Act
+            Response actualResponse = router.HandleRequest(request);
+
+            // Assert
+            Assert.NotNull(actualResponse);
+            Assert.IsType<Response>(actualResponse);
+            Assert.Equal(expectedResponse.Body, actualResponse.Body);
+            Assert.Equal(expectedResponse.Status, actualResponse.Status);
+            Assert.Equal(expectedResponse.Protocol, actualResponse.Protocol);
+
+            Assert.True(actualResponse.Headers.ContainsKey("Content-Type"));
+            Assert.Equal("text/html", actualResponse.Headers["Content-Type"]);
         }
 
         [Fact]
