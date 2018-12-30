@@ -41,5 +41,26 @@ namespace Server.UnitTests
             Assert.True(actualRequest.Headers.ContainsKey("Accept"));
             Assert.Equal("*/*", actualRequest.Headers["Accept"]);
         }
+
+        [Theory]
+        [InlineData("INVALID", "/", "HTTP/1.1")]
+        [InlineData("", "/", "HTTP/1.1")]
+        [InlineData("GET", "", "HTTP/1.1")]
+        [InlineData("GET", "/", "INVALID/1.1")]
+        [InlineData("", "", "")]
+        public void CreateRequest_CalledWithInvalidData_ThrowsInvalidRequestStringException(string method, string path, string protocol)
+        {
+            // Arrange   
+            string body = "";
+            string headers = "Host: localhost:5000\n" +
+                "User-Agent: xUnit/1.0\n" +
+                "Accept: */*\n";
+            string requestString = method + " " + path + " " + protocol + "\n"
+                + headers + "\n"
+                + "\n" + body;
+
+            // Act & Assert
+            Assert.Throws<InvalidRequestStringException>(() => RequestBuilder.CreateRequest(requestString));
+        }
     }
 }
