@@ -16,22 +16,40 @@ namespace Server
             string routePath = path.ToLower();
             string routeMethod = method.ToUpper();
 
-            if (IsValidMethod(routeMethod) && IsValidPath(routePath))
+            if (IsValidMethod(routeMethod))
             {
-                Route newRoute = new Route(routeMethod, routePath, controller);
-
-                if (Routes.ContainsKey(routePath))
+                if (IsValidPath(routePath))
                 {
-                    AddRouteToRoutes(newRoute);
+                    Route newRoute = new Route(routeMethod, routePath, controller);
+
+                    if (Routes.ContainsKey(routePath))
+                    {
+                        if (GetMatchingRouteWithFind(routeMethod, routePath) == null)
+                        {
+                            AddRouteToRoutes(newRoute);
+                        }
+                        else
+                        {
+                            throw new DuplicateRouteException();
+                        }
+                    }
+                    else
+                    {
+                        List<Route> routeList = new List<Route>
+                        {
+                            newRoute
+                        };
+                        Routes.Add(routePath, routeList);
+                    }
                 }
                 else
                 {
-                    List<Route> routeList = new List<Route>
-                {
-                    newRoute
-                };
-                    Routes.Add(routePath, routeList);
+                    throw new InvalidPathException();
                 }
+            }
+            else
+            {
+                throw new InvalidMethodException();
             }
         }
 
@@ -53,7 +71,7 @@ namespace Server
                     }
                     else
                     {
-                        return HandleMissingRoute(clientRequest);
+                        return HandleMissingMethod(clientRequest);
                     }
                 }
                 else
@@ -67,14 +85,24 @@ namespace Server
             }
         }
 
-        private Response HandleMissingRoute(Request clientRequest)
+        private Response HandleMissingMethod(Request clientRequest)
         {
-            return new Response();
+            Response response = new Response
+            {
+                Status = "405 Method Not Allowed"
+            };
+
+            return response; ;
         }
 
         private Response HandleMissingPath(Request clientRequest)
         {
-            return new Response();
+            Response response = new Response
+            {
+                Status = "404 Not Found"
+            };
+
+            return response;
         }
 
         private Response HandleInvalidRequest(Request clientRequest)

@@ -42,7 +42,8 @@ namespace Server.UnitTests
             Router router = new Router();
 
             router.Use(method1, path, controller);
-            router.Use(method1, path, controller);
+
+            Assert.Throws<DuplicateRouteException>(() => router.Use(method1, path, controller));
 
             Assert.True(router.Routes.ContainsKey(path));
             Assert.Equal(expectedPathCount, router.Routes.Count);
@@ -108,7 +109,7 @@ namespace Server.UnitTests
         [InlineData("pt", "/")]
         [InlineData("pst", "/")]
         [InlineData("del", "/")]
-        public void Use_CalledWithInvalidMethods_NoRoutesAdded(string method, string path)
+        public void Use_CalledWithInvalidMethod_NoRoutesAdded(string method, string path)
         {
             int expectedPathCount = 0;
             Func<Request, Response, Response> controller = (Request req, Response res) =>
@@ -118,18 +119,16 @@ namespace Server.UnitTests
 
             Router router = new Router();
 
-            router.Use(method, path, controller);
-
+            Assert.Throws<InvalidMethodException>(() => router.Use(method, path, controller));
             Assert.False(router.Routes.ContainsKey(path));
             Assert.Equal(expectedPathCount, router.Routes.Count);
         }
 
         [Theory]
-        [InlineData("GET", "hello")]
-        [InlineData("PUT", "hello")]
-        [InlineData("POST", "hello")]
-        [InlineData("DELETE", "hello")]
-        public void Use_CalledWithInvalidPaths_NoRoutesAdded(string method, string path)
+        [InlineData("GET", "@invalid")]
+        [InlineData("GET", "invalid")]
+        [InlineData("GET", "#invalid")]
+        public void Use_CalledWithInvalidPath_NoRoutesAdded(string method, string path)
         {
             int expectedPathCount = 0;
             Func<Request, Response, Response> controller = (Request req, Response res) =>
@@ -139,12 +138,10 @@ namespace Server.UnitTests
 
             Router router = new Router();
 
-            router.Use(method, path, controller);
-
+            Assert.Throws<InvalidPathException>(() => router.Use(method, path, controller));
             Assert.False(router.Routes.ContainsKey(path));
             Assert.Equal(expectedPathCount, router.Routes.Count);
         }
-
 
         [Theory]
         [InlineData("GET", "/", "HTTP/1.1", "")]
@@ -217,7 +214,7 @@ namespace Server.UnitTests
                 return new Response();
             }
             Router router = new Router();
-            router.Use(method, path, controller);
+            router.Use("GET", "/", controller);
 
             // Act
             Response actualResponse = router.HandleRequest(request);
@@ -242,16 +239,94 @@ namespace Server.UnitTests
 
         }
 
-        [Fact(Skip = "Tests not ready")]
-        public void HandleRequest_CalledWithValidRequest_ReturnsMissingRouteResponse()
-        {
-
-        }
-
-        [Fact(Skip = "Tests not ready")] 
+        [Fact]
         public void HandleRequest_CalledWithValidRequest_ReturnsMissingMethodResponse()
         {
+            // Arrange
+            string method = "POST";
+            string path = "/";
+            string protocol = "HTTP/1.1";
+            string body = "";
+            string headers = "Host: localhost:5000\n" +
+                "User-Agent: xUnit/1.0\n" +
+                "Accept: */*\n";
+            string requestString = method + " " + path + " " + protocol + "\n"
+                + headers + "\n"
+                + "\n" + body;
+            Dictionary<string, string> headerDict = new Dictionary<string, string>
+            {
+                { "Host", "localhost:5000" },
+                { "User-Agent", "xUnit/1.0" },
+                { "Accept", "*/*" }
+            };
 
+            Request request = new Request(requestString, method, path, protocol, headerDict, body);
+            Response expectedResponse = new Response
+            {
+                Status = "405 Method Not Allowed"
+            };
+
+            Response controller(Request req, Response res)
+            {
+                return new Response();
+            }
+            Router router = new Router();
+            router.Use("GET", path, controller);
+
+            // Act
+            Response actualResponse = router.HandleRequest(request);
+
+            // Assert
+            Assert.NotNull(actualResponse);
+            Assert.IsType<Response>(actualResponse);
+            Assert.Equal(expectedResponse.Body, actualResponse.Body);
+            Assert.Equal(expectedResponse.Status, actualResponse.Status);
+            Assert.Equal(expectedResponse.Protocol, actualResponse.Protocol);
+        }
+
+        [Fact] 
+        public void HandleRequest_CalledWithValidRequest_ReturnsMissingPathResponse()
+        {
+            // Arrange
+            string method = "GET";
+            string path = "/";
+            string protocol = "HTTP/1.1";
+            string body = "";
+            string headers = "Host: localhost:5000\n" +
+                "User-Agent: xUnit/1.0\n" +
+                "Accept: */*\n";
+            string requestString = method + " " + path + " " + protocol + "\n"
+                + headers + "\n"
+                + "\n" + body;
+            Dictionary<string, string> headerDict = new Dictionary<string, string>
+            {
+                { "Host", "localhost:5000" },
+                { "User-Agent", "xUnit/1.0" },
+                { "Accept", "*/*" }
+            };
+
+            Request request = new Request(requestString, method, path, protocol, headerDict, body);
+            Response expectedResponse = new Response
+            {
+                Status = "404 Not Found"
+            };
+
+            Response controller(Request req, Response res)
+            {
+                return new Response();
+            }
+            Router router = new Router();
+            router.Use(method, "/someOtherPath", controller);
+
+            // Act
+            Response actualResponse = router.HandleRequest(request);
+
+            // Assert
+            Assert.NotNull(actualResponse);
+            Assert.IsType<Response>(actualResponse);
+            Assert.Equal(expectedResponse.Body, actualResponse.Body);
+            Assert.Equal(expectedResponse.Status, actualResponse.Status);
+            Assert.Equal(expectedResponse.Protocol, actualResponse.Protocol);
         }
     }
 }
