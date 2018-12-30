@@ -5,7 +5,7 @@
 
         <IsPackable>false</IsPackable>
 
-        <RootNamespace>TestProject1</RootNamespace>
+        <RootNamespace>Server.UnitTests</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
@@ -16,9 +16,6 @@
         <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.1" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Compile Remove="RouteTests.cs" />
-    </ItemGroup>
     <ItemGroup>
       <ProjectReference Include="..\httpserver\Server.csproj" />
     </ItemGroup>

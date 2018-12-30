@@ -5,17 +5,21 @@ namespace Server
     {
         private string _method;
         private string _path;
-        private string _controllerId;
+        private Func<Request, Response, Response> _controller;
 
-        public Route(string method, string path, string controllerId)
+        public Route(string method, string path, Func<Request, Response, Response> controller)
         {
-            _method = method;
-            _path = path;
-            _controllerId = controllerId;
+            Method = method;
+            Path = path;
+            _controller = controller;
         }
 
-        public string ControllerId { get => _controllerId; set => _controllerId = value; }
-        public string Path { get => _path; set => _path = value; }
         public string Method { get => _method; set => _method = value; }
+        public string Path { get => _path; set => _path = value; }
+
+        public Response CreateResponse(Request req, Response res)
+        {
+            return _controller(req, res);
+        }
     }
 }
