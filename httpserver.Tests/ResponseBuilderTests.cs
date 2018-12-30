@@ -9,10 +9,12 @@ namespace Server.UnitTests
         public void CreateResponseString_CalledWithValidResponseNoBodyText_ReturnsString()
         {
             // Arrange
+            string status = "200 OK";
             Response response = new Response();
             response.AddHeader("Access", "*/*");
+            response.Status = status;
             string expectedResponseString =
-                "HTTP/1.1 200 OK\n" +
+                "HTTP/1.1 " + status + "\n" +
                 "Access: */*\n" +
                 "Content-Type: text/html\n";
 
@@ -28,11 +30,13 @@ namespace Server.UnitTests
         {
             // Arrange
             string body = "{ \"response\": \"hello world\" }";
+            string status = "200 OK";
             Response response = new Response();
             response.AddHeader("Access", "*/*");
             response.Body = body;
+            response.Status = status;
             string expectedResponseString =
-                "HTTP/1.1 200 OK\n" +
+                "HTTP/1.1 " + status + "\n" +
                 "Access: */*\n" +
                 "Content-Type: text/html\n" +
                 "\n" + body;
