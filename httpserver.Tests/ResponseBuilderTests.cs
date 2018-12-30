@@ -13,8 +13,8 @@ namespace Server.UnitTests
             response.AddHeader("Access", "*/*");
             string expectedResponseString =
                 "HTTP/1.1 200 OK\n" +
-                "Content-Type:text/html\n" +
-                "Access:*/*\n";
+                "Access: */*\n" +
+                "Content-Type: text/html\n";
 
             // Act
             string actualResponseString = ResponseBuilder.CreateResponseString(response);
