@@ -6,7 +6,18 @@ namespace Server
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            Func<Request, Response, Response> getDefaultController = (Request req, Response res) =>
+            {
+                res.Body = "Hello World";
+                return res;
+            };
+
+            Router router = new Router();
+            router.Use("GET", "/", getDefaultController);
+
+            Server server = new Server(router);
+
+            server.ListenWithTCPListener(5000);
         }
     }
 }
