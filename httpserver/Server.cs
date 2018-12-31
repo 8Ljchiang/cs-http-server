@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -10,6 +11,7 @@ namespace Server
     public class Server
     {
         private Router _router;
+        private TcpListener _listener;
         public static ManualResetEvent allDone = new ManualResetEvent(false);
 
         public Server(Router router)
@@ -81,80 +83,121 @@ namespace Server
 
         public void ListenWithTCPListener(int port)
         {
-            TcpListener server = null;
+            Dictionary<string, object> payload = new Dictionary<string, object>();
+            payload.Add("port", port);
+            HandleListen((int) payload["port"]);
 
+            AcceptConnections();
+
+            Console.WriteLine("\nHit enter to continue...");
+            Console.Read();
+        }
+
+        private void AcceptConnections() 
+        {
+            // Enter the listening loop.
+            while (true)
+            {
+                Console.WriteLine(" *** Waiting for connection...");
+
+                Dictionary<string, object> payload = new Dictionary<string, object>();
+                try
+                {
+                    // Perform a blocking call to accept requests.
+                    // You could also use server.AcceptSocket() here.
+                    TcpClient client = _listener.AcceptTcpClient();
+                    ShowConnectionInfo(client);
+
+                    payload.Add("connection", client);
+                }
+                catch (Exception ex)
+                {
+                    HandleError(ex.Message);
+                }
+                finally
+                {
+                    HandleConnection((TcpClient) payload["connection"]);
+                }
+            }
+        }
+
+        private void HandleClose()
+        {
+            // Stop listening for new clients.
+            _listener.Stop();
+        }
+
+        private void HandleListen(int port)
+        {
             try
             {
                 IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
                 IPAddress ipAddress = ipHostInfo.AddressList[0];
 
                 // TcpListener server = new TcpListener(port);
-                server = new TcpListener(ipAddress, port);
+                _listener = new TcpListener(ipAddress, port);
 
                 // Start listening for client requests.
-                server.Start();
+                _listener.Start();
                 Console.WriteLine($"{ipAddress}:{port} is starting listener socket...");
-
-                // Enter the listening loop.
-                while (true)
-                {
-                    Console.WriteLine(" *** Waiting for connection...");
-                    // Perform a blocking call to accept requests.
-                    // You could also use server.AcceptSocket() here.
-                    TcpClient client = server.AcceptTcpClient();
-                    ShowConnectionInfo(client);
-
-                    // Get a stream object for reading and writing
-                    NetworkStream stream = client.GetStream();
-
-                    string requestString = GetDataFromStream(stream);
-                    Console.WriteLine("Received:");
-                    Console.WriteLine(requestString);
-
-                    Request clientRequest = RequestBuilder.CreateRequest(requestString);
-
-                    Response response = _router.HandleRequest(clientRequest);
-
-                    string responseString = ResponseBuilder.CreateResponseString(response);
-
-                    // Send back a response.
-                    byte[] msg = Encoding.ASCII.GetBytes(responseString);
-                    stream.Write(msg, 0, msg.Length);
-
-                    Console.WriteLine("Sent:");
-                    Console.WriteLine(responseString);
-
-                    // Shutdown and end connection
-                    client.Close();
-                }
             }
-            catch (SocketException e)
+            catch (SocketException ex)
             {
-                Console.WriteLine("SocketException: {0}", e);
+                HandleError(ex.Message);
+                //Console.WriteLine("SocketException: {0}", e);
+            }
+        }
+
+        private void HandleConnection(TcpClient client)
+        {
+            try
+            {
+                // Get a stream object for reading and writing
+                NetworkStream stream = client.GetStream();
+
+                string requestString = GetDataFromStream(stream);
+                Console.WriteLine("Received:");
+                Console.WriteLine(requestString);
+
+                Request clientRequest = RequestBuilder.CreateRequest(requestString);
+
+                Response response = _router.HandleRequest(clientRequest);
+
+                string responseString = ResponseBuilder.CreateResponseString(response);
+
+                // Send back a response.
+                byte[] msg = Encoding.ASCII.GetBytes(responseString);
+                stream.Write(msg, 0, msg.Length);
+
+                Console.WriteLine("Sent:");
+                Console.WriteLine(responseString);
+            }
+            catch (InvalidPathException ex)
+            {
+                HandleError(ex.Message);
+            }
+            catch (InvalidMethodException ex)
+            {
+                HandleError(ex.Message);
+            }
+            catch (InvalidRequestStringException ex)
+            {
+                HandleError(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                HandleError(ex.Message);
             }
             finally
             {
-                // Stop listening for new clients.
-                server.Stop();
+                // Shutdown and end connection
+                client.Close();
             }
-
-            Console.WriteLine("\nHit enter to continue...");
-            Console.Read();
         }
 
-        private void HandleListen()
+        private void HandleError(string message)
         {
-
-        }
-
-        private void HandleConnection()
-        {
-
-        }
-
-        private void HandleError()
-        {
-
+            Console.WriteLine(" *** Error:\n {0}\n", message);
         }
 
         private void Initialize()
@@ -190,7 +233,7 @@ namespace Server
 
         private void ShowConnectionInfo(TcpClient client)
         {
-            Console.WriteLine("----- {0} connected at {1} -----", client.ToString(), new DateTime().ToString());
+            Console.WriteLine("----- {0} connected at {1} -----", client.ToString(), DateTime.Now.ToString());
         }
     }
 }
