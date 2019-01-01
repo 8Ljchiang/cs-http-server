@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Server
 {
@@ -24,6 +25,14 @@ namespace Server
                     handler(payload);
                 }
             }
+        }
+
+        public void ProcessAsync(string commandType, Dictionary<string, object> payload)
+        {
+            Task task = Task.Run(() =>
+            {
+                Process(commandType, payload);
+            });
         }
 
         public void RegisterCommandHandler(string commandType, Action<Dictionary<string, object>> handler)

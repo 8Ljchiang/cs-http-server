@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Server
 {
@@ -15,9 +16,17 @@ namespace Server
             Router router = new Router();
             router.Use("GET", "/", getDefaultController);
 
-            Server server = new Server(router);
+            int port = 5000;
 
-            server.ListenWithTCPListener(5000);
+            Server server = new Server(router, false);
+            void ListenFinisher(Dictionary<string, object> payload)
+            {
+                Console.WriteLine($"Listening on port {port}...");
+            }
+
+            server.On("listen", ListenFinisher);
+
+            server.ListenWithTCPListener(port);
         }
     }
 }
