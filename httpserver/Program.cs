@@ -13,8 +13,15 @@ namespace Server
                 return res;
             };
 
+            Func<Request, Response, Response> postController = (Request req, Response res) =>
+            {
+                res.Body = "{ response: success }";
+                return res;
+            };
+
             Router router = new Router();
             router.Use("GET", "/", getDefaultController);
+            router.Use("POST", "/", postController);
 
             int port = 5000;
 

@@ -143,6 +143,118 @@ namespace Server.UnitTests
             Assert.Equal(expectedPathCount, router.Routes.Count);
         }
 
+        [Fact]
+        public void HandleRequest_CalledWithMultipleRoutesRegistered_ReturnsAppropriateResponse()
+        {
+            // Arrange 
+            // 1. Create multiple handlers.
+            string homeRoute = "/";
+            string usersRoute = "/users";
+            string getMethod = "GET";
+            string postMethod = "POST";
+            string protocol = "HTTP/1.1";
+            string successStatus = "200 OK";
+            string getHomeHeaderValue = "GetHomeRouteHandler";
+            string postHomeHeaderValue = "PostHomeRouteHandler";
+            string getUsersHeaderValue = "GetUsersRouteHandler";
+            string postUsersHeaderValue = "PostUsersRouteHandler";
+
+            Router router = new Router();
+
+            const string Key = "Handler-Name";
+
+            string getHomeResponseBody = "{ \"data\": \"some-info\" }";
+            string getUsersResponseBody = "{ \"data\": [{ \"username\": \"abc123\" }, { \"username\": \"abc124\" }] }";
+
+            Response GetHomeRouteHandler(Request req, Response res)
+            {
+                res.AddHeader(Key, getHomeHeaderValue);
+                res.Body = getHomeResponseBody;
+                return res;
+            }
+
+            Response PostHomeRouteHandler(Request req, Response res)
+            {
+                res.AddHeader(Key, postHomeHeaderValue);
+                res.Body = req.Body;
+                return res;
+            }
+
+            Response GetUsersRouteHandler(Request req, Response res)
+            {
+                res.AddHeader(Key, getUsersHeaderValue);
+                res.Body = getUsersResponseBody;
+                return res;
+            }
+
+            Response PostUsersRouteHandler(Request req, Response res)
+            {
+                res.AddHeader(Key, postUsersHeaderValue);
+                res.Body = req.Body;
+                return res;
+            }
+
+            // 2. Register handlers to the router.
+            router.Use(getMethod, homeRoute, GetHomeRouteHandler);
+            router.Use(postMethod, homeRoute, PostHomeRouteHandler);
+            router.Use(getMethod, usersRoute, GetUsersRouteHandler);
+            router.Use(postMethod, usersRoute, PostUsersRouteHandler);
+
+            // 3. Create Requests.
+            Dictionary<string, string> headers = new Dictionary<string, string>();
+            string postHomeBody = "{ \"message\": \"Hello World\" }";
+            string postUsersBody = "{ \"username\": \"abc123\" }";
+            Request getHomeRequest = new Request("", getMethod, homeRoute, protocol, headers, "");
+            Request postHomeRequest = new Request("", postMethod, homeRoute, protocol, headers, postHomeBody);
+            Request getUsersRequest = new Request("", getMethod, usersRoute, protocol, headers, "");
+            Request postUsersRequest = new Request("", postMethod, usersRoute, protocol, headers, postUsersBody);
+
+            // Act
+            // 1. Process 3 requests that correspond to the three different handlers.
+            Response actualGetHomeResponse = router.HandleRequest(getHomeRequest);
+            Response actualPostHomeResponse = router.HandleRequest(postHomeRequest);
+            Response actualGetUsersReponse = router.HandleRequest(getUsersRequest);
+            Response actualPostUsersResponse = router.HandleRequest(postUsersRequest);
+
+            // Assert
+            // 1. Assert that each of the 3 requests return responses that they should.
+            // 1a. Check that all responses are not null.
+            Assert.NotNull(actualGetHomeResponse);
+            Assert.NotNull(actualPostHomeResponse);
+            Assert.NotNull(actualGetUsersReponse);
+            Assert.NotNull(actualPostUsersResponse);
+
+            // 1b. Check that all responses are of the type Response.
+            Assert.IsType<Response>(actualGetHomeResponse);
+            Assert.IsType<Response>(actualPostHomeResponse);
+            Assert.IsType<Response>(actualGetUsersReponse);
+            Assert.IsType<Response>(actualPostUsersResponse);
+
+            // 1c. Check that the Get / response is correct.
+            Assert.Equal(successStatus, actualGetHomeResponse.Status);
+            Assert.Equal(protocol, actualGetHomeResponse.Protocol);
+            Assert.Equal(getHomeResponseBody, actualGetHomeResponse.Body);
+            Assert.Equal(getHomeHeaderValue, actualGetHomeResponse.Headers[Key]);
+
+            // 1d. Check that the Post / response is correct.
+            Assert.Equal(successStatus, actualPostHomeResponse.Status);
+            Assert.Equal(protocol, actualPostHomeResponse.Protocol);
+            Assert.Equal(postHomeBody, actualPostHomeResponse.Body);
+            Assert.Equal(postHomeHeaderValue, actualPostHomeResponse.Headers[Key]);
+
+            // 1e. Check that the Get /users response is correct.
+            Assert.Equal(successStatus, actualGetUsersReponse.Status);
+            Assert.Equal(protocol, actualGetUsersReponse.Protocol);
+            Assert.Equal(getUsersResponseBody, actualGetUsersReponse.Body);
+            Assert.Equal(getUsersHeaderValue, actualGetUsersReponse.Headers[Key]);
+
+            // 1f. Check that the Post /users response is correct.
+            Assert.Equal(successStatus, actualPostUsersResponse.Status);
+            Assert.Equal(protocol, actualPostUsersResponse.Protocol);
+            Assert.Equal(postUsersBody, actualPostUsersResponse.Body);
+            Assert.Equal(postUsersHeaderValue, actualPostUsersResponse.Headers[Key]);
+        }
+
         [Theory]
         [InlineData("GET", "/", "HTTP/1.1", "")]
         [InlineData("PUT", "/", "HTTP/1.1", "")]
