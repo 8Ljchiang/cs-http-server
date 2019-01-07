@@ -11,7 +11,7 @@ namespace Server.UnitTests
         {
             int expectedRouteCount = 2;
             int expectedPathCount = 1;
-            Func<Request, Response, Response> controller = (Request req, Response res) =>
+            Func<Request, Response, string, Response> controller = (Request req, Response res, string contextData) =>
             {
                 return res;
             };
@@ -33,7 +33,7 @@ namespace Server.UnitTests
         {
             int expectedRouteCount = 1;
             int expectedPathCount = 1;
-            Func<Request, Response, Response> controller = (Request req, Response res) =>
+            Func<Request, Response, string, Response> controller = (Request req, Response res, string contextData) =>
             {
                 return res;
             };
@@ -55,7 +55,7 @@ namespace Server.UnitTests
         {
             int expectedRouteCount = 1;
             int expectedPathCount = 2;
-            Func<Request, Response, Response> controller = (Request req, Response res) =>
+            Func<Request, Response, string, Response> controller = (Request req, Response res, string contextData) =>
             {
                 return res;
             };
@@ -90,7 +90,7 @@ namespace Server.UnitTests
         {
             int expectedRouteCount = 1;
             int expectedPathCount = 1;
-            Func<Request, Response, Response> controller = (Request req, Response res) =>
+            Func<Request, Response, string, Response> controller = (Request req, Response res, string contextData) =>
             {
                 return res;
             };
@@ -211,10 +211,10 @@ namespace Server.UnitTests
 
             // Act
             // 1. Process 3 requests that correspond to the three different handlers.
-            Response actualGetHomeResponse = router.HandleRequest(getHomeRequest);
-            Response actualPostHomeResponse = router.HandleRequest(postHomeRequest);
-            Response actualGetUsersReponse = router.HandleRequest(getUsersRequest);
-            Response actualPostUsersResponse = router.HandleRequest(postUsersRequest);
+            Response actualGetHomeResponse = router.HandleRequest(getHomeRequest, "");
+            Response actualPostHomeResponse = router.HandleRequest(postHomeRequest, "");
+            Response actualGetUsersReponse = router.HandleRequest(getUsersRequest, "");
+            Response actualPostUsersResponse = router.HandleRequest(postUsersRequest, "");
 
             // Assert
             // 1. Assert that each of the 3 requests return responses that they should.

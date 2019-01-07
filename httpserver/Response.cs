@@ -17,7 +17,7 @@ namespace Server
 
         public void AddHeader(string key, string value)
         {
-            this.Headers.Add(key, value);
+            this.Headers[key] = value;
         }
 
         public string Status { get => _status; set => _status = value; }

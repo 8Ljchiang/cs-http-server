@@ -11,7 +11,7 @@ namespace Server
 
         public Dictionary<string, List<Route>> Routes { get => _routes; set => _routes = value; }
 
-        public void Use(string method, string path, Func<Request, Response, Response> controller)
+        public void Use(string method, string path, Func<Request, Response, string, Response> controller)
         {
             string routePath = path.ToLower();
             string routeMethod = method.ToUpper();
@@ -53,7 +53,7 @@ namespace Server
             }
         }
 
-        public Response HandleRequest(Request clientRequest)
+        public Response HandleRequest(Request clientRequest, string serverIpAddress)
         {
             string requestProtocol = clientRequest.Protocol.Split("/")[0];
             string requestMethod = clientRequest.Method;
@@ -74,7 +74,7 @@ namespace Server
                             {
                                 Response defaultResponse = new Response();
                                 Route matchedRoute = GetMatchingRouteWithFind(requestMethod, requestPath);
-                                return matchedRoute.CreateResponse(clientRequest, defaultResponse);
+                                return matchedRoute.CreateResponse(clientRequest, defaultResponse, serverIpAddress);
                             }
                             else
                             {
@@ -97,7 +97,7 @@ namespace Server
         {
             Response response = new Response();
             Route getRoute = GetMatchingRouteWithFind("GET", clientRequest.Path);
-            getRoute.CreateResponse(clientRequest, response);
+            getRoute.CreateResponse(clientRequest, response, " ");
             response.Body = "";
             return response;
         }

@@ -14,7 +14,7 @@ namespace Server.UnitTests
             string expectedCallString = "controller()";
             List<string> methodCallHistory = new List<string>();
 
-            Func<Request, Response, Response> controller = (Request req, Response res) =>
+            Func<Request, Response, string, Response> controller = (Request req, Response res, string contextData) =>
             {
                 methodCallHistory.Add(expectedCallString);
                 return res;
@@ -29,7 +29,7 @@ namespace Server.UnitTests
             Response mockResponse = new Response();
 
             // Act
-            Response actual = route.CreateResponse(mockRequest, mockResponse);
+            Response actual = route.CreateResponse(mockRequest, mockResponse, " ");
 
             // Assert
             Assert.Equal(expectedCallCount, methodCallHistory.Count);

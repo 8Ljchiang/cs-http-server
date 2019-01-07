@@ -13,6 +13,8 @@ namespace Server
         private readonly Boolean _isBlocking = true;
         private TcpListener _listener;
         private CommandDispatcher _dispatcher;
+        private string _serverIpAddress;
+        private string _serverPort;
         public static ManualResetEvent allDone = new ManualResetEvent(false);
 
         public Server(Router router, bool isBlocking = true)
@@ -53,17 +55,17 @@ namespace Server
                     // You could also use server.AcceptSocket() here.
                     // TODO: Change this to non-blocking.
 
-                    if (_listener.Pending())
-                    {
+                    //if (_listener.Pending())
+                    //{
                         TcpClient client = _listener.AcceptTcpClient();
                         ShowConnectionInfo(client);
 
                         payload.Add("connection", client);
-                    }
-                    else
-                    {
-                        Console.WriteLine("No pending connections...");
-                    }
+                   //}
+                    //else
+                    //{
+                    //    Console.WriteLine("No pending connections...");
+                    //}
                 }
                 catch (Exception ex)
                 {
@@ -95,7 +97,8 @@ namespace Server
             {
                 IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
                 IPAddress ipAddress = ipHostInfo.AddressList[0];
-
+                _serverIpAddress = ipAddress.ToString();
+                _serverPort = port.ToString();
                 // TcpListener server = new TcpListener(port);
                 _listener = new TcpListener(ipAddress, port);
 
@@ -130,7 +133,7 @@ namespace Server
 
                 Request clientRequest = RequestBuilder.CreateRequest(requestString);
 
-                Response response = _router.HandleRequest(clientRequest);
+                Response response = _router.HandleRequest(clientRequest, _serverIpAddress + ":" + _serverPort);
 
                 string responseString = ResponseBuilder.CreateResponseString(response);
 
